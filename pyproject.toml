@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "goodreads-scraper"
+name = "goodreads_scraper"
 version = "0.1.0"
 description = "Small python scripts to scrape start & read dates from your books."
 authors = ["David Polido <dav.polido@gmail.com>"]
