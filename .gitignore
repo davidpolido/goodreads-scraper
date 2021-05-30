@@ -133,3 +133,6 @@ tasks.md
 
 # VSCode folder
 .vscode/
+
+# Data save folder
+data/
