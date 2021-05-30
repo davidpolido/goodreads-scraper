@@ -46,7 +46,7 @@ def parse_timeline_event(event_raw):
 
 
 @retry()
-def parse_book(session, book_id):
+def scrape_book(session, book_id):
     logging.basicConfig()
     response = session.get(f"https://www.goodreads.com/book/show/{book_id}")
     html = response.text
