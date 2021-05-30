@@ -3,7 +3,9 @@ import re
 
 from bs4 import BeautifulSoup
 from retry import retry
+from tqdm import tqdm
 
+GR_BASE_BOOK_URL = "https://www.goodreads.com/book/show/"
 
 def parse_timeline_event(event_raw):
     event_string = re.sub(r"[\r\n]+", "|", event_raw)
@@ -48,10 +50,9 @@ def parse_timeline_event(event_raw):
 @retry()
 def scrape_book(session, book_id):
     logging.basicConfig()
-    response = session.get(f"https://www.goodreads.com/book/show/{book_id}")
-    html = response.text
+    response = session.get(f"{GR_BASE_BOOK_URL}{book_id}")
 
-    soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(response.text, "html.parser")
     title = soup.find("h1", id="bookTitle").get_text().replace("\n", "").strip()
     edition = soup.find("span", attrs={"itemprop": "bookFormat"}).get_text().strip()
     try:
@@ -76,5 +77,19 @@ def scrape_book(session, book_id):
             event["language"] = language
 
             book.append(event)
-    print(f"Parsed '{title}' (id: {book_id})")
+    #print(f"Parsed '{title}' (id: {book_id})")
     return book
+
+
+def scrape_books(session, book_ids):
+    books = []
+    failed_ids = []
+
+    for id in tqdm(book_ids):
+        try:
+            books += scrape_book(session, id)
+        except:
+            print(f"Error in book with id: {id}.")
+            failed_ids.append(id)
+
+    return books
