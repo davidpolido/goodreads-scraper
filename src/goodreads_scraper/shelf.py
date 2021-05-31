@@ -1,7 +1,11 @@
 import math
 import re
+import time
 
 from bs4 import BeautifulSoup
+import requests
+
+from .utils import progress
 
 
 def get_number_books(soup):
@@ -33,25 +37,29 @@ def parse_shelf_page(page_soup):
     return page_book_ids
 
 
-def scrape_shelf(session, shelf_url, limit=0):
-    print(f"Scraping {shelf_url}")
-    response = session.get(shelf_url)
+def scrape_shelf(shelf_url, limit=0):
+    response = requests.get(shelf_url)
     first_page_soup = BeautifulSoup(response.text, "html.parser")
 
     num_books = get_number_books(first_page_soup)
     num_pages = get_number_pages(num_books, limit)
 
+    msg = "Scraping pages in shelf: "
+    progress(0, num_pages, msg)
+
     shelf_book_ids = parse_shelf_page(first_page_soup)
+    progress(1, num_pages, msg)
 
     for page_num in range(2, num_pages + 1):
-        response = session.get(f"{shelf_url}?page={page_num}")
+        response = requests.get(f"{shelf_url}?page={page_num}")
         page_soup = BeautifulSoup(response.text, "html.parser")
 
         shelf_book_ids += parse_shelf_page(page_soup)
+        progress(page_num, num_pages, msg)
 
     scraped_ids = shelf_book_ids[0:limit] if limit else shelf_book_ids
 
     print(
-        f"\nShelf scraped: {len(scraped_ids)}/{num_books} book ids retrieved.",
+        f"Shelf scraped: {len(scraped_ids)} book ids retrieved.",
     )
     return scraped_ids

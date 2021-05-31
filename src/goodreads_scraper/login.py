@@ -38,11 +38,11 @@ def login(user_email, user_password, login_url=LOGIN_URL):
     n = get_login_n(response.text)
     payload.update({"authenticity_token": token, "n": n})
 
-    print(f"Attempting to log in as {payload['user[email]']}")
+    print(f"Attempting to log in as {user_email}...", end="")
     p = session.post(login_url, data=payload)
     if p.ok:
-        print(f"Logged in as {payload['user[email]']}")
+        print(f"\rAttempting to log in as {user_email} - Done!", end="")
         return session
     else:
-        print("Problem logging in. Please try again.")
+        print("\nProblem logging in. Please try again.")
         return None
