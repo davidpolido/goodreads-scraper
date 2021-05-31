@@ -12,8 +12,11 @@ def get_number_books(soup):
     )
 
 
-def get_number_pages(num_books):
-    return math.ceil(num_books / 30)
+def get_number_pages(num_books, limit):
+    if limit == 0 or limit >= num_books:
+        return math.ceil(num_books / 30)
+    else:
+        return math.ceil(limit / 30)
 
 
 def parse_shelf_page(page_soup):
@@ -30,13 +33,13 @@ def parse_shelf_page(page_soup):
     return page_book_ids
 
 
-def scrape_shelf(session, shelf_url):
+def scrape_shelf(session, shelf_url, limit=0):
     print(f"Scraping {shelf_url}")
     response = session.get(shelf_url)
     first_page_soup = BeautifulSoup(response.text, "html.parser")
 
     num_books = get_number_books(first_page_soup)
-    num_pages = get_number_pages(num_books)
+    num_pages = get_number_pages(num_books, limit)
 
     shelf_book_ids = parse_shelf_page(first_page_soup)
 
@@ -46,5 +49,9 @@ def scrape_shelf(session, shelf_url):
 
         shelf_book_ids += parse_shelf_page(page_soup)
 
-    print(f"Shelf scraped: {len(shelf_book_ids)}/{num_books} book ids retrieved.")
-    return shelf_book_ids
+    scraped_ids = shelf_book_ids[0:limit] if limit else shelf_book_ids
+
+    print(
+        f"\nShelf scraped: {len(scraped_ids)}/{num_books} book ids retrieved.",
+    )
+    return scraped_ids
