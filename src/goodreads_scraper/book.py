@@ -62,6 +62,8 @@ def scrape_book(session, book_id):
     except AttributeError:
         language = None
     timeline_html = soup.find_all("div", class_="readingTimeline__text")
+    work_id_link = soup.find(class_="otherEditionsActions").a["href"]
+    work_id = re.search(r"([0-9]+)", work_id_link).group(0) if work_id_link else None
 
     book = []
     for div in timeline_html[::-1]:
@@ -77,6 +79,7 @@ def scrape_book(session, book_id):
             event["book_id"] = book_id
             event["edition"] = edition
             event["language"] = language
+            event["work_id"] = work_id
 
             book.append(event)
     return book
